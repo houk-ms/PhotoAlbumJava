@@ -1,0 +1,49 @@
+services:
+  # PostgreSQL Database service
+  postgres-db:
+    image: postgres:15
+    container_name: photoalbum-postgres
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=photoalbum
+      - POSTGRES_PASSWORD=photoalbum
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d
+    networks:
+      - photoalbum-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U photoalbum -d postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Photo Album Java Application  
+  photoalbum-java-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: photoalbum-java-app
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/postgres
+      - POSTGRES_USERNAME=photoalbum
+      - POSTGRES_PASSWORD=photoalbum
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - photoalbum-network
+    restart: on-failure
+
+volumes:
+  postgres_data:
+
+networks:
+  photoalbum-network:
+    driver: bridge
