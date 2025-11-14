@@ -232,15 +232,59 @@ PhotoAlbum/
 ?   ??? application.properties       # Configuration
 ├── oracle-init/                     # Oracle DB initialization scripts
 ├── infra/                           # Azure infrastructure (Bicep)
-│   ├── main.bicep                   # Main template
-│   ├── container-app.bicep          # Container Apps configuration
-│   └── database.bicep               # PostgreSQL configuration
+│   ├── main.bicep                   # Main Bicep template with all resources
+│   └── main.parameters.json         # Bicep parameters file
+├── .azure/                          # Azure Developer CLI files
+│   ├── plan.copilotmd               # Deployment plan
+│   └── progress.copilotmd           # Deployment progress
 ├── docker-compose.yml               # Local development services
 ├── Dockerfile                       # Application container build
-├── azure-setup.sh                   # Azure infrastructure deployment
-├── deploy-to-azure.sh              # Application deployment
+├── azure.yaml                       # Azure Developer CLI configuration
+├── setup-azure.sh                   # Azure deployment setup script
+├── DEPLOYMENT.md                    # Detailed deployment instructions
 ├── pom.xml                          # Maven dependencies
 ??? README.md                        # This file
+```
+
+## Azure Deployment
+
+The application can be deployed to Azure using Azure Developer CLI (azd) with the provided infrastructure files.
+
+### Quick Start Deployment
+
+1. **Run the setup script:**
+   ```bash
+   ./setup-azure.sh
+   ```
+   This will guide you through authentication and environment setup.
+
+2. **Deploy to Azure:**
+   ```bash
+   azd up --no-prompt
+   ```
+
+### What Gets Deployed
+
+- **Azure Container Apps**: Hosts the Spring Boot application with auto-scaling
+- **Azure Database for PostgreSQL**: Flexible Server for data storage
+- **Azure Container Registry**: Stores Docker images
+- **Azure Key Vault**: Securely stores connection strings
+- **Application Insights**: Application monitoring and telemetry
+- **Log Analytics Workspace**: Centralized logging
+
+### Detailed Instructions
+
+For complete deployment instructions, troubleshooting, and configuration options, see [DEPLOYMENT.md](DEPLOYMENT.md).
+
+### Architecture
+
+The Azure deployment uses:
+- Container Apps for serverless container hosting
+- PostgreSQL Flexible Server (Standard_D2ds_v5)
+- Managed Identity for secure authentication
+- Key Vault for secrets management
+- Application Insights for monitoring
+
 ```
 
 ## Contributing
