@@ -216,6 +216,33 @@ Oracle Enterprise Manager is available at `http://localhost:5500/em` for databas
 - BLOB storage in database impacts performance at scale
 - Suitable for development and small-scale deployments
 
+## Azure Deployment Resource Verification
+
+Before deploying to Azure, you can verify that your resource group has all the necessary resources using the included verification scripts.
+
+### Required Azure Resources
+
+1. **Azure Database for PostgreSQL Flexible Server** - For data storage
+2. **Azure Container Apps OR Azure App Service** - For hosting the application
+3. **Azure Container Registry** (optional) - For storing container images
+
+### Quick Check
+
+```bash
+# Using Python script
+python check-azure-resources.py --subscription <subscription-id> --resource-group <rg-name>
+
+# Using Bash script
+./check-azure-resources.sh --subscription <subscription-id> --resource-group <rg-name>
+
+# Or with environment variables
+export AZURE_SUBSCRIPTION_ID=<subscription-id>
+export AZURE_RESOURCE_GROUP=<rg-name>
+python check-azure-resources.py
+```
+
+For detailed instructions on Azure resource verification, see [AZURE_RESOURCE_VERIFICATION.md](AZURE_RESOURCE_VERIFICATION.md).
+
 ## Project Structure
 
 ```
@@ -231,14 +258,12 @@ PhotoAlbum/
 ?   ??? static/                      # Static web assets (CSS, JS)
 ?   ??? application.properties       # Configuration
 ├── oracle-init/                     # Oracle DB initialization scripts
-├── infra/                           # Azure infrastructure (Bicep)
-│   ├── main.bicep                   # Main template
-│   ├── container-app.bicep          # Container Apps configuration
-│   └── database.bicep               # PostgreSQL configuration
+├── postgres-init/                   # PostgreSQL DB initialization scripts
 ├── docker-compose.yml               # Local development services
 ├── Dockerfile                       # Application container build
-├── azure-setup.sh                   # Azure infrastructure deployment
-├── deploy-to-azure.sh              # Application deployment
+├── check-azure-resources.py         # Azure resource verification (Python)
+├── check-azure-resources.sh         # Azure resource verification (Bash)
+├── AZURE_RESOURCE_VERIFICATION.md   # Azure resource verification guide
 ├── pom.xml                          # Maven dependencies
 ??? README.md                        # This file
 ```
