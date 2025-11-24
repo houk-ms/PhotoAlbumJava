@@ -36,19 +36,29 @@ class Colors:
     END = '\033[0m'
 
 
-def run_az_command(command):
-    """Execute an Azure CLI command and return the output"""
+def run_az_command(command_args):
+    """Execute an Azure CLI command and return the output
+    
+    Args:
+        command_args: List of command arguments or string (for backward compatibility)
+    """
+    # Convert string to list if necessary (for compatibility)
+    if isinstance(command_args, str):
+        import shlex
+        command_args = shlex.split(command_args)
+    
     try:
         result = subprocess.run(
-            command,
-            shell=True,
+            command_args,
+            shell=False,
             capture_output=True,
             text=True,
             check=True
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"{Colors.RED}Error executing command: {command}{Colors.END}")
+        # Don't print the full command for security
+        print(f"{Colors.RED}Error executing Azure CLI command{Colors.END}")
         print(f"{Colors.RED}Error details: {e.stderr}{Colors.END}")
         return None
 
@@ -56,7 +66,7 @@ def run_az_command(command):
 def check_azure_login():
     """Check if user is logged in to Azure CLI"""
     print(f"\n{Colors.BLUE}Checking Azure CLI authentication...{Colors.END}")
-    result = run_az_command("az account show")
+    result = run_az_command(["az", "account", "show"])
     if result is None:
         print(f"{Colors.RED}❌ Not logged in to Azure CLI{Colors.END}")
         print(f"{Colors.YELLOW}Please run: az login{Colors.END}")
@@ -68,9 +78,9 @@ def check_azure_login():
 def get_subscription_info(subscription_id=None):
     """Get current subscription information"""
     if subscription_id:
-        run_az_command(f"az account set --subscription {subscription_id}")
+        run_az_command(["az", "account", "set", "--subscription", subscription_id])
     
-    result = run_az_command("az account show --output json")
+    result = run_az_command(["az", "account", "show", "--output", "json"])
     if result:
         return json.loads(result)
     return None
@@ -79,7 +89,7 @@ def get_subscription_info(subscription_id=None):
 def check_resource_group_exists(resource_group):
     """Check if the resource group exists"""
     print(f"\n{Colors.BLUE}Checking resource group '{resource_group}'...{Colors.END}")
-    result = run_az_command(f"az group show --name {resource_group} --output json 2>/dev/null")
+    result = run_az_command(["az", "group", "show", "--name", resource_group, "--output", "json"])
     
     if result:
         rg_info = json.loads(result)
@@ -95,7 +105,7 @@ def check_resource_group_exists(resource_group):
 def list_resources_in_group(resource_group):
     """List all resources in the resource group"""
     print(f"\n{Colors.BLUE}Listing all resources in '{resource_group}'...{Colors.END}")
-    result = run_az_command(f"az resource list --resource-group {resource_group} --output json")
+    result = run_az_command(["az", "resource", "list", "--resource-group", resource_group, "--output", "json"])
     
     if result:
         resources = json.loads(result)
@@ -114,7 +124,7 @@ def check_postgresql_server(resource_group):
     """Check for PostgreSQL Flexible Server"""
     print(f"\n{Colors.BLUE}Checking for PostgreSQL Flexible Server...{Colors.END}")
     result = run_az_command(
-        f"az postgres flexible-server list --resource-group {resource_group} --output json 2>/dev/null"
+        ["az", "postgres", "flexible-server", "list", "--resource-group", resource_group, "--output", "json"]
     )
     
     if result:
@@ -137,7 +147,7 @@ def check_container_apps(resource_group):
     """Check for Azure Container Apps"""
     print(f"\n{Colors.BLUE}Checking for Azure Container Apps...{Colors.END}")
     result = run_az_command(
-        f"az containerapp list --resource-group {resource_group} --output json 2>/dev/null"
+        ["az", "containerapp", "list", "--resource-group", resource_group, "--output", "json"]
     )
     
     if result:
@@ -158,7 +168,7 @@ def check_app_service(resource_group):
     """Check for Azure App Service"""
     print(f"\n{Colors.BLUE}Checking for Azure App Service...{Colors.END}")
     result = run_az_command(
-        f"az webapp list --resource-group {resource_group} --output json 2>/dev/null"
+        ["az", "webapp", "list", "--resource-group", resource_group, "--output", "json"]
     )
     
     if result:
@@ -179,7 +189,7 @@ def check_container_registry(resource_group):
     """Check for Azure Container Registry"""
     print(f"\n{Colors.BLUE}Checking for Azure Container Registry...{Colors.END}")
     result = run_az_command(
-        f"az acr list --resource-group {resource_group} --output json 2>/dev/null"
+        ["az", "acr", "list", "--resource-group", resource_group, "--output", "json"]
     )
     
     if result:
